@@ -510,67 +510,119 @@
     </footer>
   </div>
 
-  <script>
-    // === 메인 트렌드 차트 ===
+  
+<script>
+  async function loadTrendData() {
+    const res = await fetch('trends_merged.json');
+    if (!res.ok) {
+      console.error('trends_merged.json 로딩 실패:', res.status);
+      return null;
+    }
+    return await res.json();
+  }
+
+  function pickSeries(json, groupId, keywordExact) {
+    const group = json.groups.find(g => g.id === groupId);
+    if (!group) return null;
+    return group.series.find(s => s.keyword === keywordExact) || null;
+  }
+
+  async function drawMainChart() {
+    const json = await loadTrendData();
+    if (!json) return;
+
+    // 대표 키워드 선택 (원하면 여기만 바꾸면 됨)
+    const aSeries = pickSeries(json, 'A', '국립중앙박물관 굿즈');
+    const bSeries = pickSeries(json, 'B', '자개');
+    const cSeries = pickSeries(json, 'C', '국립중앙박물관');
+
+    if (!aSeries || !bSeries || !cSeries) {
+      console.error('필요한 시리즈를 찾지 못했습니다.', { aSeries, bSeries, cSeries });
+      return;
+    }
+
+    const labels = aSeries.data.map(d => d.date);
+    const aData = aSeries.data.map(d => d.value ?? null);
+    const bData = bSeries.data.map(d => d.value ?? null);
+    const cData = cSeries.data.map(d => d.value ?? null);
+
     const ctx = document.getElementById('mainTrendChart').getContext('2d');
 
-    // 예시용 라벨 & 데이터 (월 단위 10개 샘플)
-    const labels = [
-      '2021-01','2021-04','2021-07','2021-10',
-      '2022-01','2022-04','2022-07','2022-10',
-      '2023-01','2023-04'
-    ];
-
-    const data = {
-      labels,
-      datasets: [
-        {
-          label: 'A 그룹 · 국립중앙박물관 굿즈',
-          data: [5,12,18,22,28,32,30,35,40,45],   // 실제 값으로 교체
-          borderColor: '#38bdf8',
-          backgroundColor: 'rgba(56,189,248,0.16)',
-          tension: 0.35,
-          borderWidth: 2,
-          pointRadius: 2.5,
-          pointHoverRadius: 4,
-          fill: true
-        },
-        {
-          label: 'B 그룹 · 자개(전통 소재)',
-          data: [3,5,7,9,10,11,13,15,17,20],
-          borderColor: '#a855f7',
-          backgroundColor: 'rgba(168,85,247,0.16)',
-          tension: 0.35,
-          borderWidth: 1.8,
-          pointRadius: 2,
-          pointHoverRadius: 3.5,
-          fill: true
-        },
-        {
-          label: 'C 그룹 · 국립중앙박물관(기관)',
-          data: [10,14,18,20,22,25,26,30,34,38],
-          borderColor: '#f97316',
-          backgroundColor: 'rgba(249,115,22,0.18)',
-          tension: 0.35,
-          borderWidth: 1.8,
-          pointRadius: 2,
-          pointHoverRadius: 3.5,
-          fill: true
-        }
-      ]
-    };
-
-    const mainTrendChart = new Chart(ctx, {
+    new Chart(ctx, {
       type: 'line',
-      data,
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'A 그룹 · ' + aSeries.keyword,
+            data: aData,
+            borderColor: '#38bdf8',
+            backgroundColor: 'rgba(56,189,248,0.16)',
+            tension: 0.35,
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 4,
+            fill: true
+          },
+          {
+            label: 'B 그룹 · ' + bSeries.keyword,
+            data: bData,
+            borderColor: '#a855f7',
+            backgroundColor: 'rgba(168,85,247,0.14)',
+            tension: 0.35,
+            borderWidth: 1.8,
+            pointRadius: 1.8,
+            pointHoverRadius: 3.5,
+            fill: true
+          },
+          {
+            label: 'C 그룹 · ' + cSeries.keyword,
+            data: cData,
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249,115,22,0.14)',
+            tension: 0.35,
+            borderWidth: 1.8,
+            pointRadius: 1.8,
+            pointHoverRadius: 3.5,
+            fill: true
+          }
+        ]
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: 'rgba(226,232,240,0.9)',
+              font: { size: 11, family: 'Pretendard' }
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15,23,42,0.92)',
+            borderColor: 'rgba(148,163,184,0.6)',
+            borderWidth: 1,
+            titleFont: { size: 11, family: 'Pretendard' },
+            bodyFont: { size: 11, family: 'Pretendard' },
+            padding: 8,
+            displayColors: true,
+            callbacks: {
+              label: function(ctx) {
+                return ' ' + ctx.dataset.label + ' : ' + ctx.formattedValue;
+              }
+            }
+          }
+        },
         scales: {
           x: {
             ticks: {
               color: 'rgba(148,163,184,0.9)',
-              font: { size: 10 }
+              font: { size: 10 },
+              maxTicksLimit: 8
             },
             grid: {
               color: 'rgba(30,64,175,0.35)',
@@ -586,40 +638,16 @@
             grid: {
               color: 'rgba(30,64,175,0.25)',
               drawBorder: false
-            },
-            beginAtZero: true,
-            max: 50
-          }
-        },
-        plugins: {
-          legend: {
-            labels: {
-              color: '#e5e7eb',
-              font: { size: 11 }
-            }
-          },
-          tooltip: {
-            backgroundColor: 'rgba(15,23,42,0.96)',
-            borderColor: 'rgba(148,163,184,0.5)',
-            borderWidth: 1,
-            titleFont: { size: 11, family: 'Pretendard' },
-            bodyFont: { size: 11, family: 'Pretendard' },
-            padding: 8,
-            displayColors: true,
-            callbacks: {
-              label: function(ctx) {
-                return ' ' + ctx.dataset.label + ' : ' + ctx.formattedValue;
-              }
             }
           }
         }
       }
     });
-  </script>
+  }
 
-<script>
-console.log("placeholder for fetch code");
+  // 페이지 로드 후 실행
+  window.addEventListener('DOMContentLoaded', drawMainChart);
 </script>
-</body>
 
+</body>
 </html>
