@@ -186,7 +186,7 @@
     h1 {
       font-size: 24px;
       letter-spacing: -0.04em;
-      margin: 0 0 4px;
+      margin: 0 0 12px;
     }
 
     .subtitle {
@@ -256,6 +256,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-bottom: 4px;
     }
 
     .panel-kicker {
@@ -264,6 +265,7 @@
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.12em;
+      margin-bottom: 4px;
     }
 
     .panel-sub {
@@ -519,6 +521,22 @@
         align-items: flex-start;
       }
 
+      .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .panel-title {
+        flex-wrap: wrap;
+      }
+
+      .group-toggle-row {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
       .mini-card {
         grid-template-columns: minmax(0, 1fr) 56px;
       }
@@ -589,9 +607,11 @@
               <div class="panel-kicker">종합 비교</div>
               <div class="panel-title">
                 A·B·C 그룹 관심도 추이
-                <span class="badge-compare">대표 키워드 3종 비교</span>
               </div>
-              <div class="panel-sub">A: 국립중앙박물관 굿즈 · B: 자개 · C: 국립중앙박물관</div>
+              <div class="panel-sub">
+                <span class="badge-compare">대표 키워드 3종</span>
+                A: 국립중앙박물관 굿즈 · B: 자개 · C: 국립중앙박물관
+              </div>
             </div>
             <div class="group-toggle-row" aria-label="그룹 표시 여부">
               <label><input type="checkbox" id="toggleA" checked />A 그룹</label>
