@@ -374,13 +374,24 @@
       gap: 4px;
       padding: 4px 7px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.85);
+      background: transparent;
       border: 1px solid rgba(148, 163, 184, 0.55);
       cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .group-toggle-row label:hover {
+      background: #555555 !important;
+      color: #38bdf8 !important;
     }
 
     :root[data-theme="light"] .group-toggle-row label {
-      background: rgba(255, 255, 255, 0.9);
+      background: transparent;
+    }
+
+    :root[data-theme="light"] .group-toggle-row label:hover {
+      background: #222222 !important;
+      color: #ffffff !important;
     }
 
     .group-toggle-row input {
